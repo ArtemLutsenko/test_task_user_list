@@ -12,7 +12,7 @@
 <style scoped lang="scss">
 .header {
   border-bottom: 1px solid #4C4D4F;
-  padding: 30px 0;
+  padding: 10px 0;
   min-height: 50px;
 
   &__title {

@@ -16,10 +16,16 @@ const store = useStore();
 const router = useRouter();
 
 const userId = computed(() => Number(route.params.id));
+const isLoading = ref(false);
+const error = ref(null);
+
 const user = computed((): User | undefined => {
   return store.getters['users/getUserById'](userId.value);
 });
 const editMode = ref(route.query.edit === 'true');
+const toggleEditMode = () => {
+  editMode.value = !editMode.value;
+};
 
 const editedUser = ref<User | null>(null);
 
@@ -30,20 +36,32 @@ watch(user, (newUser) => {
 }, {immediate: true});
 
 onMounted(async () => {
-  if (store.getters['users/users'].length === 0) {
-    await store.dispatch('users/fetchUsers');
-  }
-
-  if (userId.value && user.value === undefined) {
-    router.replace({name: 'NotFound'});
+  try {
+    isLoading.value = true;
+    if (store.getters['users/users'].length === 0) {
+      await store.dispatch('users/fetchUsers');
+    }
+    if (userId.value && user.value === undefined) {
+      router.replace({ name: 'NotFound' });
+    }
+  } catch (err) {
+    error.value = err;
+    console.error(err);
+  } finally {
+    isLoading.value = false;
   }
 });
 
-const saveUser = () => {
-  editMode.value = false
-  store.dispatch('users/updateUser', editedUser.value);
-  ElMessage.success('User updated')
-}
+const saveUser = async () => {
+  try {
+    await store.dispatch('users/updateUser', editedUser.value);
+    ElMessage.success('User updated');
+    toggleEditMode();
+  } catch (err) {
+    ElMessage.error('Failed to update user');
+    console.error(err);
+  }
+};
 
 const cancelChanges = () => {
   editMode.value = false;
@@ -54,11 +72,15 @@ const cancelChanges = () => {
   }
 };
 
-const deleteUser = () => {
-  ElMessage.success('User deleted')
-  console.log(userId)
-  store.dispatch('users/deleteUser', userId.value);
-  router.replace({name: 'users'});
+const deleteUser = async () => {
+  try {
+    await store.dispatch('users/deleteUser', userId.value);
+    ElMessage.success('User deleted');
+    router.replace({ name: 'users' });
+  } catch (err) {
+    ElMessage.error('Failed to delete user');
+    console.error(err);
+  }
 };
 
 </script>
@@ -66,6 +88,10 @@ const deleteUser = () => {
 <template>
   <div class="container">
     <router-link to="/users" class="user-link"> Back to users</router-link>
+    <div v-if="isLoading">Loading...</div>
+
+    <div v-if="error">An error occurred: {{ error }}</div>
+
     <el-card class="user-card" v-if="user">
       <template #header>
         <div class="user-card__header">
@@ -75,7 +101,7 @@ const deleteUser = () => {
             <el-button type="success" :icon="Check" circle @click.prevent="saveUser"
                        v-if="editMode"/>
 
-            <el-button type="primary" :icon="Edit" circle @click.prevent="editMode=true"
+            <el-button type="primary" :icon="Edit" circle @click.prevent="toggleEditMode"
                        v-if="!editMode"/>
 
             <el-button type="danger" :icon="Delete" circle
@@ -157,12 +183,21 @@ const deleteUser = () => {
   &__main {
     display: flex;
     gap: 30px;
+
+    @media (max-width: 756px) {
+      flex-direction: column;
+    }
   }
 
   &__img {
     width: 280px;
     height: 280px;
     border-radius: 50%;
+
+    @media (max-width: 756px) {
+      display: flex;
+      align-self: center;
+    }
   }
 
   &__info{
