@@ -1,6 +1,5 @@
 <script setup lang=ts>
-import {defineProps} from "vue";
-import {User} from '@/interfaces/User.interface';
+import type { User } from '@/interfaces/User.interface';
 import {
   Delete,
   Edit,

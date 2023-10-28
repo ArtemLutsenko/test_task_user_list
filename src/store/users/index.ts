@@ -1,4 +1,4 @@
-import { Store } from 'vuex';
+import type { Module } from 'vuex';
 import axios from 'axios';
 import type { User } from '@/interfaces/User.interface';
 
@@ -6,9 +6,9 @@ interface State {
     users: User[];
 }
 
-export default {
+const usersModule: Module<State, any> = {
     namespaced: true,
-    state: (): State => ({
+    state: () => ({
         users: [],
     }),
     mutations: {
@@ -31,7 +31,7 @@ export default {
         },
     },
     actions: {
-        async fetchUsers({ commit }: Store<State>) {
+        async fetchUsers({ commit }) {
             const cachedUsers = localStorage.getItem('users');
             if (cachedUsers) {
                 commit('setUsers', JSON.parse(cachedUsers));
@@ -45,7 +45,7 @@ export default {
                 }
             }
         },
-        async refetchUsers({commit}: Store<State>) {
+        async refetchUsers({ commit }) {
             try {
                 const response = await axios.get('https://reqres.in/api/users');
                 localStorage.setItem('users', JSON.stringify(response.data.data));
@@ -54,10 +54,10 @@ export default {
                 console.error('There was an error fetching the users!', error);
             }
         },
-        updateUser({ commit }: Store<State>, updatedUser: User) {
+        updateUser({ commit }, updatedUser: User) {
             commit('updateUser', updatedUser);
         },
-        deleteUser({ commit }: Store<State>, userId: number) {
+        deleteUser({ commit }, userId: number) {
             commit('deleteUser', userId);
         },
     },
@@ -68,3 +68,5 @@ export default {
         },
     },
 };
+
+export default usersModule;

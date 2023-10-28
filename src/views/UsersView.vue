@@ -2,7 +2,7 @@
 import {computed, defineComponent, onMounted} from 'vue';
 import {mapActions, mapGetters, useStore} from 'vuex';
 import UsersCard from "@/components/users/UsersCard.vue";
-import {User} from "@/interfaces/User.interface";
+import type { User } from '@/interfaces/User.interface';
 import {ElMessage} from "element-plus";
 
 const store = useStore();

@@ -2,7 +2,7 @@
 import {useRoute, useRouter} from "vue-router";
 import {useStore} from "vuex";
 import {computed, onMounted, ref, watch, watchEffect} from "vue";
-import {User} from "@/interfaces/User.interface";
+import type { User } from '@/interfaces/User.interface';
 import {
   Delete,
   Edit,
@@ -17,7 +17,7 @@ const router = useRouter();
 
 const userId = computed(() => Number(route.params.id));
 const isLoading = ref(false);
-const error = ref(null);
+const error = ref<Error | null>(null);
 
 const user = computed((): User | undefined => {
   return store.getters['users/getUserById'](userId.value);
@@ -45,7 +45,7 @@ onMounted(async () => {
       router.replace({ name: 'NotFound' });
     }
   } catch (err) {
-    error.value = err;
+    error.value = err as Error;
     console.error(err);
   } finally {
     isLoading.value = false;
@@ -117,7 +117,7 @@ const deleteUser = async () => {
           <p>
             <span class="text-bold">Firs name: </span>
 
-            <el-input v-if="editMode" v-model="editedUser.first_name" placeholder="Please input"/>
+            <el-input v-if="editMode && editedUser" v-model="editedUser.first_name" placeholder="Please input"/>
 
             <span v-else>{{ user.first_name }}</span>
           </p>
@@ -125,7 +125,7 @@ const deleteUser = async () => {
           <p>
             <span class="text-bold">Last name: </span>
 
-            <el-input v-if="editMode" v-model="editedUser.last_name" placeholder="Please input"/>
+            <el-input v-if="editMode && editedUser" v-model="editedUser.last_name" placeholder="Please input"/>
 
             <span v-else>{{ user.last_name }}</span>
           </p>
@@ -133,7 +133,7 @@ const deleteUser = async () => {
           <p>
             <span class="text-bold">Email: </span>
 
-            <el-input v-if="editMode" v-model="editedUser.email" placeholder="Please input"/>
+            <el-input v-if="editMode && editedUser" v-model="editedUser.email" placeholder="Please input"/>
 
             <span v-else>{{ user.email }}</span>
           </p>
